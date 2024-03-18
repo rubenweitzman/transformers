@@ -167,3 +167,7 @@ tags
 
 # ruff
 .ruff_cache
+
+
+# personal
+playground/slurm
