@@ -501,7 +501,7 @@ class EsmSdpaSelfAttention(EsmSelfAttention):
             attention_mask = bias
 
         attention_mask = None
-        print("attention_mask", attention_mask)
+        # print("attention_mask", attention_mask)
 
         # Using scaled_dot_product_attention function directly with bias as attn_mask
         context_layer = torch.nn.functional.scaled_dot_product_attention(
