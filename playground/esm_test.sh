@@ -16,6 +16,9 @@ export CONDA_PKGS_DIRS=/scratch-ssd/pastin/conda_pkgs
 # source /scratch-ssd/oatml/miniconda3/bin/activate protein_npt_env
 source /scratch-ssd/oatml/miniconda3/bin/activate /users/rubman/.conda/envs/protriever
 
-
+srun python playground/debug_bart.py 
 srun python playground/debug_esm.py 
-# srun python playground/debug_bart.py 
+srun python playground/debug_t5.py 
+
+
+# srun python playground/benchmark_esm.py

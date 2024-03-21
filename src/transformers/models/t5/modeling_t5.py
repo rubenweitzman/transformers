@@ -716,7 +716,7 @@ class T5SdpaAttention(T5Attention):
             query_states,
             key_states,
             value_states,
-            attn_mask=position_bias_masked,
+            attn_mask=position_bias_masked.contiguous(),
             dropout_p=self.dropout if self.training else 0.0,
             is_causal= False, 
             scale=None

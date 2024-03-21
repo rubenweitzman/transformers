@@ -3,9 +3,7 @@ import torch
 from torch.backends.cuda import sdp_kernel, SDPBackend
 import torch.utils.benchmark as benchmark
 
-def benchmark_model_forward_pass(model, inputs, device):
-    model.to(device).half()  # Convert model to float16
-    inputs = {k: v.to(device).half() for k, v in inputs.items()}  # Convert inputs to float16
+def benchmark_model_forward_pass(model, inputs):
     t0 = benchmark.Timer(
         stmt="model(**inputs)",
         globals={"model": model, "inputs": inputs},
@@ -15,20 +13,26 @@ def benchmark_model_forward_pass(model, inputs, device):
 
 def main():
     device = torch.device("cuda")
-    print(f"Running on device: {device}")
-    print(f"PyTorch version: {torch.__version__}")
-    # Example input
+    print(f"Working with model esm on {device}")
+
+    # Initialize tokenizer and model
     tokenizer = EsmTokenizer.from_pretrained("facebook/esm2_t6_8M_UR50D")
     model_esm_sdpa = EsmModel.from_pretrained("facebook/esm2_t6_8M_UR50D").to(device).half()  # Convert model to float16
     model_esm_eager = EsmModel.from_pretrained("facebook/esm2_t6_8M_UR50D").to(device).half()  # Convert model to float16
 
-    model_esm_eager.config._attn_implementation = "eager"
-    inputs = tokenizer("ACDEF", return_tensors="pt").to(device).half()  # Convert inputs to float16
+    # Prepare inputs
+    
+    sequences = ["ACDEF", "GHJKL", "MNOPQ"]  # Replace with your actual sequences
+    inputs = tokenizer(sequences, return_tensors="pt")
+    inputs = {k: v.to(device) for k, v in inputs.items()}  # Move inputs to the correct device
+
+    # Convert model and inputs to float16
+
 
     with torch.no_grad():
         # the eager way
         print(f"Using implementation of attention {model_esm_eager.config._attn_implementation}")
-        print(f"The default non-sdpa implementation runs in {benchmark_model_forward_pass(model_esm_eager, inputs, device):.3f} microseconds")
+        print(f"The default non-sdpa implementation runs in {benchmark_model_forward_pass(model_esm_eager, inputs):.3f} microseconds")
 
         outputs_eager = model_esm_eager(**inputs)
 
@@ -46,7 +50,7 @@ def main():
         for backend, args in backend_map.items():
             with sdp_kernel(**args):
                 try:
-                    print(f"The {backend.name.lower()} implementation runs in {benchmark_model_forward_pass(model_esm_sdpa, inputs, device):.3f} microseconds")
+                    print(f"The {backend.name.lower()} implementation runs in {benchmark_model_forward_pass(model_esm_sdpa, inputs):.3f} microseconds")
                 except RuntimeError as e:
                     print(f"{backend.name} is not supported on this device. Reason: {e}")
 
@@ -58,6 +62,6 @@ def main():
         print(f"Check pooler output: {check_pooler_output}")
 
 
-        if __name__ == "__main__":
+if __name__ == "__main__":
     main()
 

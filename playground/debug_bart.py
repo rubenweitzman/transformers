@@ -14,9 +14,10 @@ def benchmark_model_forward_pass(model, inputs, device):
     return result.mean * 1e6
 
 def main():
+    print("Working with model bart")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Running on device: {device}")
-
+    
     tokenizer = BartTokenizer.from_pretrained("facebook/bart-large")
     model_bart = BartModel.from_pretrained("facebook/bart-large").to(device)
 
